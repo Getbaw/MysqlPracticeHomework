@@ -9,8 +9,8 @@ const mysql = require("mysql2");
 let app = express();
 
 //use body parser as middleware
-app.use(app.json());
-app.use(app.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 //step five: steup dB and user in myPhpadmin
 
 //step seven: test API
@@ -86,51 +86,55 @@ app.get("/createtable", (req, res) => {
 
 // insert iPhone data into tables
 app.post("/add-product", (req, res) => {
-  //products table
+  // products table
   let product_name = req.body.product_name;
   let product_url = req.body.product_url;
-  //product_description table
+  // product_description table
   let product_brief_description = req.body.product_brief_description;
   let product_description = req.body.product_description;
   let product_img = req.body.product_img;
   let product_link = req.body.product_link;
-  //product_price table
+  // ProductPrice table
   let starting_price = req.body.starting_price;
   let price_range = req.body.price_range;
 
-  let insertProduct = `INSERT INTO Products (product_name, product_url) VALUES ("${product_name}", "${product_url}" )`;
+  let insertProduct = `INSERT INTO products (product_url,product_name) VALUES ("${product_url}", "${product_name}") ;`;
+
   dBconnection.query(insertProduct, (err) => {
     if (err) {
       console.log(err);
-      res.end("err");
+      res.end(err);
     }
   });
-  const selectProductId = `SELECT product_id FROM Products WHERE product_name = "${req.body.product_name}"`;
-  dBconnection.query(selectProductId, (err, results) => {
-    const product_id = results[0].product_id;
+  const selectPID = `SELECT product_id FROM products WHERE product_name = "${product_name}"`;
+
+  dBconnection.query(selectPID, (err, result) => {
+    const PId = result[0].product_id;
     if (err) {
       console.log(err);
-      res.end("err");
+      res.end(err);
     } else {
-      let insert_product_description = `INSERT INTO ProductDescription (product_id, product_brief_description, product_description, product_img, product_link) VALUES ("${product_id}", "${product_brief_description}", "${product_description}", "${product_img}", "${product_link}")`;
+      let insert_product_des = `INSERT INTO ProductDescription(product_id,product_brief_description,product_description,product_img,product_link) VALUES (${PId},"${product_brief_description}","${product_description}","${product_img}","${product_link}")`;
 
-      let insert_product_price = `INSERT INTO ProductPrice (product_id, starting_price, price_range) VALUES ("${product_id}", "${starting_price}", "${price_range}")`;
-      dBconnection.query(insert_product_description, (err) => {
+      let insert_Product_price = `INSERT INTO ProductPrice(product_id,starting_price,price_range) VALUES ("${PId}","${starting_price}", "${price_range}") ;`;
+
+      dBconnection.query(insert_product_des, (err) => {
         if (err) {
           console.log(err);
-          res.end("err");
+          res.end(err);
         }
       });
-      dBconnection.query(insert_product_price, (err) => {
+
+      dBconnection.query(insert_Product_price, (err) => {
         if (err) {
           console.log(err);
-          res.end("err");
+          res.end(err);
         }
       });
     }
+    res.send("data inserted");
   });
 });
-
 
 //three: creat server
 let port = 2627;
